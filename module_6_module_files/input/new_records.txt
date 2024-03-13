@@ -1,0 +1,3 @@
+news; This is the text of the news. Something interesTING HAPPENED.; Default CITY
+ad; this is an AD; 31/12/2024
+song; My Song; The Artist
