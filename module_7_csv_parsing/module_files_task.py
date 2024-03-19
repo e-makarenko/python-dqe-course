@@ -9,6 +9,7 @@ from task_module_3 import process_text
 # import class for text analysis
 from text_analyser import TextAnalyser
 
+
 class Record:
     def publish(self):
         self.text = process_text(self.text)
@@ -20,6 +21,7 @@ class Record:
             file.write(self.get_record_content())
             file.write('\n\n')
         return self.text
+
 
 class FileReader:
     def __init__(self, filepath = None):
@@ -71,6 +73,7 @@ class FileReader:
             os.remove(self.filepath)
         return True
 
+
 class News(Record):
     def __init__(self, text, city):
         self.text = text
@@ -80,6 +83,13 @@ class News(Record):
     def get_record_content(self):
         date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         return self.text + '\n' + self.city + ', ' + date
+
+    # overwrite method from parent class to perform text processing on the city also
+    def publish(self):
+        self.text = process_text(self.text)
+        self.city = process_text(self.city)
+        return super().publish()
+
 
 class PrivateAd(Record):
     def __init__(self, text, exp_date):
@@ -91,16 +101,18 @@ class PrivateAd(Record):
         days_left = (self.exp_date - datetime.datetime.now()).days
         return self.text + '\n' + 'Valid until: ' + self.exp_date.strftime("%d/%m/%Y") + ', ' + str(days_left) + ' days left'
 
+
 class SongOfTheDay(Record):
     def __init__(self, song, artist):
         self.song = song
         self.artist = artist
         self.publish_header = 'Song of the day ----------------------\nSong name - Artist: \n'
-        self.text = process_text(f"{self.song} - {self.artist}")
+        self.text = f"{self.song} - {self.artist}"
 
     def get_record_content(self):
         date = datetime.datetime.now().strftime("%d/%m/%Y")
         return self.text + "\n" + date
+
 
 # check if user has provided a file path in command line
 # if yes, use it as the filepath, if not set filepath to None
