@@ -95,8 +95,8 @@ class SongOfTheDay(Record):
     def __init__(self, song, artist):
         self.song = song
         self.artist = artist
-        self.text = f"Song name - Artist\n{self.song} "-" {self.artist}\n"
-        self.publish_header = 'Song of the day ----------------------\n'
+        self.publish_header = 'Song of the day ----------------------\nSong name - Artist: \n'
+        self.text = process_text(f"{self.song} - {self.artist}")
 
     def get_record_content(self):
         date = datetime.datetime.now().strftime("%d/%m/%Y")
