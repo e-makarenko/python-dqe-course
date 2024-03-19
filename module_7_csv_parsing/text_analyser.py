@@ -16,6 +16,9 @@ class TextAnalyser:
             for character in word:
                 if character.isalnum():
                     cleaned_word += character
+            # append to the list only if cleaned_word is not an empty string
+            if cleaned_word:
+                cleaned_words.append(cleaned_word)
             cleaned_words.append(cleaned_word)
 
         word_counts = Counter(cleaned_words)
