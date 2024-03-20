@@ -19,7 +19,6 @@ class TextAnalyser:
             # append to the list only if cleaned_word is not an empty string
             if cleaned_word:
                 cleaned_words.append(cleaned_word)
-            cleaned_words.append(cleaned_word)
 
         word_counts = Counter(cleaned_words)
         return word_counts
