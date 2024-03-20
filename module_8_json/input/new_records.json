@@ -1,0 +1,17 @@
+{
+  "1": {
+    "record_type": "ad",
+    "text": "some Advertisement TEXT",
+    "date": "22/01/2025"
+  },
+  "2": {
+    "record_type": "news",
+    "text": "Wroclaw is ranked as best city to live in the whole country. received max votes in our questionairre for 2023",
+    "city": "wrocLAW"
+  },
+  "3": {
+    "record_type": "song",
+    "song": "Mascara",
+    "artist": "DeftonES"
+  }
+}
