@@ -1,0 +1,14 @@
+<records>
+  <record type="news">
+    <text>New tram line number 63 opened. residents of southern districT are HAPPY.</text>
+    <city>Warsaw</city>
+  </record>
+  <record type="ad">
+    <text>Looking for a housekeeper</text>
+    <date>02/06/2024</date>
+  </record>
+  <record type="song">
+    <song>Tricky Disco</song>
+    <artist>Discotronic</artist>
+  </record>
+</records>
