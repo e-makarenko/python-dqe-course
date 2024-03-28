@@ -17,16 +17,30 @@ from module_4_functions.task_module_3 import process_text
 # import module for text analysis
 from module_8_json.text_analyser import TextAnalyser
 
+# import module for database functionality
+from database_manager import DatabaseManager
+
 
 class Record:
     # class variable to store and process all records from 1 input
     all_records = []
 
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, text, record_type, params):
+        # process text here to have it processed everywhere
+        self.text = process_text(text)
+        self.record_type = record_type
+        self.params = params
+        # update text with its normalized version
+        self.params['text'] = self.text
+
         self.analyser = TextAnalyser(self.text)
+
         # add the instance of Record to all_records
         Record.all_records.append(self)
+
+        # initialize class instance, create tables
+        self.db = DatabaseManager()
+        self.db.create_tables()
 
     def analyse_all_records():
         all_text = " ".join([record.text for record in Record.all_records])
@@ -39,17 +53,23 @@ class Record:
         analyser.save_to_csv('output/letter_counts.csv', letter_counts, is_header=True)
 
     def write_text(self):
-        self.text = process_text(self.text)
-        # write the text into output feed.txt file
         output_dir = 'output'
         os.makedirs(output_dir, exist_ok=True)
         with open(os.path.join(output_dir, 'feed.txt'), 'a') as file:
-            file.write(self.publish_header)
+            file.write(self.get_publish_header())
             file.write(self.get_record_content())
             file.write('\n\n')
 
+    def get_publish_header(self):
+        raise NotImplementedError("Method needs to be implemented in a child class")
+
+    def get_record_content(self):
+        raise NotImplementedError("Method needs to be implemented in a child class")
+
     def publish(self):
         Record.analyse_all_records()
+        # add functionality of writing to the DB
+        self.db.check_duplicate_and_insert(self.record_type, **self.params)
         self.write_text()
 
 
@@ -95,16 +115,16 @@ class TxtFileReader(FileReader):
         super().__init__(filepath=filepath, filename='new_records.txt')
 
     def read_data(self):
-         with open(self.filepath, 'r') as file:
+        with open(self.filepath, 'r') as file:
             lines = file.readlines()
 
-         records = []
-         for line in lines:
+        records = []
+        for line in lines:
             record_data = {}
             record_data["record_type"], *record_data["args"] = tuple(line.rstrip().split('; '))
             records.append(record_data)
 
-         return records
+        return records
 
 
 class JSONReader(FileReader):
@@ -145,39 +165,36 @@ class XMLReader(FileReader):
 
 class News(Record):
     def __init__(self, text, city):
-        super().__init__(text)
-        self.city = city
-        self.publish_header = 'News --------------------------\n'
+        super().__init__(text, 'news', {'city': process_text(city), 'text': text})
+
+    def get_publish_header(self):
+        return 'News --------------------------------\n'
 
     def get_record_content(self):
         date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-        return self.text + '\n' + self.city + ', ' + date
-
-    # overwrite method from parent class to perform text processing on the city also
-    def publish(self):
-        self.text = process_text(self.text)
-        self.city = process_text(self.city)
-        super().write_text()
+        return self.text + '\n' + self.params['city'] + ', ' + date
 
 
 class PrivateAd(Record):
     def __init__(self, text, exp_date):
-        super().__init__(text)
-        self.exp_date = datetime.datetime.strptime(exp_date, '%d/%m/%Y')
-        self.publish_header = 'Private ad ---------------------------\n'
+        exp_date_as_date = datetime.datetime.strptime(exp_date, '%d/%m/%Y')
+        super().__init__(text, 'ad', {'exp_date': exp_date_as_date.strftime("%d/%m/%Y"), 'text': text})
+
+    def get_publish_header(self):
+        return 'Private ad ---------------------------\n'
 
     def get_record_content(self):
-        days_left = (self.exp_date - datetime.datetime.now()).days
-        return self.text + '\n' + 'Valid until: ' + self.exp_date.strftime("%d/%m/%Y") + ', ' + str(days_left) + ' days left'
-
+        exp_date_as_date = datetime.datetime.strptime(self.params['exp_date'], "%d/%m/%Y")
+        days_left = (exp_date_as_date.date() - datetime.datetime.now().date()).days
+        return self.text + '\n' + 'Valid until: ' + self.params['exp_date'] + ', ' + str(days_left) + ' days left'
 
 class SongOfTheDay(Record):
     def __init__(self, song, artist):
-        self.song = song
-        self.artist = artist
-        text = f"{self.song} - {self.artist}"
-        super().__init__(text)
-        self.publish_header = 'Song of the day ----------------------\nSong name - Artist: \n'
+        text = f"{song} - {artist}"
+        super().__init__(text, 'song', {'text': text})
+
+    def get_publish_header(self):
+        return 'Song of the day ----------------------\nSong name - Artist: \n'
 
     def get_record_content(self):
         date = datetime.datetime.now().strftime("%d/%m/%Y")
